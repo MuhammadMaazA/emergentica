@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergentica - Voice Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 50px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 60px;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 18px;
+            margin-bottom: 40px;
+        }
+
+        .call-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 25px 60px;
+            font-size: 24px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: 600;
+            margin: 10px;
+        }
+
+        .call-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
+        }
+
+        .call-button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .call-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .call-button.calling {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            animation: pulse 2s infinite;
+        }
+
+        .call-button.danger {
+            background: linear-gradient(135deg, #fc5c7d 0%, #6a82fb 100%);
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                box-shadow: 0 10px 30px rgba(72, 187, 120, 0.4);
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 15px 50px rgba(72, 187, 120, 0.8);
+                transform: scale(1.05);
+            }
+        }
+
+        .microphone-icon {
+            font-size: 32px;
+        }
+
+        .status {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 500;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .status.idle {
+            background: #f7fafc;
+            color: #718096;
+        }
+
+        .status.connecting {
+            background: #fef5e7;
+            color: #d97706;
+            animation: blink 1.5s infinite;
+        }
+
+        .status.connected {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .demo-scenarios {
+            background: #fef3c7;
+            border: 2px solid #fbbf24;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .demo-scenarios h4 {
+            color: #92400e;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .demo-scenarios p {
+            color: #78350f;
+            margin-bottom: 8px;
+            padding: 10px 15px;
+            background: white;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .demo-scenarios p:hover {
+            background: #fffbeb;
+            transform: translateX(5px);
+        }
+
+        .info-box {
+            background: #e0f2fe;
+            border-left: 4px solid #0284c7;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: left;
+            border-radius: 8px;
+        }
+
+        .info-box h3 {
+            color: #0c4a6e;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .info-box p {
+            color: #075985;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .dashboard-link {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e0e7ff;
+            border-radius: 10px;
+        }
+
+        .dashboard-link a {
+            color: #4f46e5;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .dashboard-link a:hover {
+            text-decoration: underline;
+        }
+
+        .audio-indicator {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 10px;
+        }
+
+        .audio-indicator.active {
+            display: block;
+        }
+
+        .wave-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            height: 60px;
+        }
+
+        .wave-bar {
+            width: 5px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 3px;
+            animation: wave 0.8s ease-in-out infinite;
+        }
+
+        .wave-bar:nth-child(1) { animation-delay: 0s; }
+        .wave-bar:nth-child(2) { animation-delay: 0.1s; }
+        .wave-bar:nth-child(3) { animation-delay: 0.2s; }
+        .wave-bar:nth-child(4) { animation-delay: 0.3s; }
+        .wave-bar:nth-child(5) { animation-delay: 0.4s; }
+        .wave-bar:nth-child(6) { animation-delay: 0.3s; }
+        .wave-bar:nth-child(7) { animation-delay: 0.2s; }
+        .wave-bar:nth-child(8) { animation-delay: 0.1s; }
+
+        @keyframes wave {
+            0%, 100% { height: 20%; }
+            50% { height: 100%; }
+        }
+    </style>
+    <!-- Load Retell Web SDK -->
+    <script type="module">
+        import { RetellWebClient } from "https://cdn.jsdelivr.net/npm/retell-client-js-sdk@latest/+esm";
+        window.RetellWebClient = RetellWebClient;
+        window.retellSDKLoaded = true;
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🚨</div>
+        <h1>Emergentica</h1>
+        <p class="subtitle">Voice-Interactive Emergency Dispatcher</p>
+
+        <button id="startButton" class="call-button" onclick="startCall()">
+            <span class="microphone-icon">🎤</span>
+            <span>Start Voice Call</span>
+        </button>
+
+        <button id="endButton" class="call-button danger" onclick="endCall()" style="display: none;">
+            <span>⏹️</span>
+            <span>End Call</span>
+        </button>
+
+        <div id="status" class="status idle">
+            Ready to connect - Click to start
+        </div>
+
+        <div id="audioIndicator" class="audio-indicator">
+            <div class="wave-container">
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+            </div>
+        </div>
+
+        <div class="demo-scenarios">
+            <h4>💡 Try These Demo Scenarios:</h4>
+            <p onclick="copyScenario(this)">🟢 "I need to report a noise complaint at 123 Main Street"</p>
+            <p onclick="copyScenario(this)">🟡 "There's a car accident on Highway 101, no injuries"</p>
+            <p onclick="copyScenario(this)">🔴 "There's a shooting at West High School!"</p>
+        </div>
+
+        <div class="info-box">
+            <h3>✨ Official Retell SDK</h3>
+            <p>
+                Using Retell's official JavaScript SDK (v2.3.0) for reliable WebRTC connection.
+                Click "Start Voice Call", allow microphone, and speak your emergency!
+            </p>
+        </div>
+
+        <div class="dashboard-link">
+            📊 <a href="http://localhost:8501" target="_blank">Open Live Dashboard</a> to see AI analysis in real-time!
+        </div>
+    </div>
+
+    <script>
+        let retellClient = null;
+        const startButton = document.getElementById('startButton');
+        const endButton = document.getElementById('endButton');
+        const statusDiv = document.getElementById('status');
+        const audioIndicator = document.getElementById('audioIndicator');
+
+        // Initialize Retell client on page load
+        window.addEventListener('load', async () => {
+            // Wait a bit for module to load
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            if (typeof RetellWebClient !== 'undefined' && window.retellSDKLoaded) {
+                console.log('✅ Retell SDK loaded successfully');
+                try {
+                    retellClient = new RetellWebClient();
+                    setupRetellEvents();
+                    console.log('✅ Retell client initialized');
+                } catch (error) {
+                    console.error('❌ Error initializing client:', error);
+                    updateStatus('error', '❌ SDK initialization failed');
+                }
+            } else {
+                console.error('❌ Retell SDK not loaded');
+                updateStatus('error', '❌ SDK failed to load. Please refresh.');
+            }
+        });
+
+        function setupRetellEvents() {
+            if (!retellClient) return;
+
+            retellClient.on('call_started', () => {
+                console.log('✅ Call started');
+                updateStatus('connected', '✅ Connected! Speak now...');
+                startButton.style.display = 'none';
+                endButton.style.display = 'inline-flex';
+                startButton.classList.add('calling');
+                audioIndicator.classList.add('active');
+            });
+
+            retellClient.on('call_ended', () => {
+                console.log('📞 Call ended');
+                updateStatus('idle', '📞 Call ended');
+                resetUI();
+            });
+
+            retellClient.on('agent_start_talking', () => {
+                console.log('🤖 Agent started talking');
+                updateStatus('connected', '🤖 AI is responding...');
+            });
+
+            retellClient.on('agent_stop_talking', () => {
+                console.log('🎤 Agent stopped talking');
+                updateStatus('connected', '🎤 Your turn - speak now!');
+            });
+
+            retellClient.on('audio', (audio) => {
+                console.log('🔊 Audio data received');
+            });
+
+            retellClient.on('update', (update) => {
+                console.log('📊 Update:', update);
+            });
+
+            retellClient.on('metadata', (metadata) => {
+                console.log('📋 Metadata:', metadata);
+            });
+
+            retellClient.on('error', (error) => {
+                console.error('❌ Error:', error);
+                updateStatus('error', `❌ Error: ${error.message || 'Connection failed'}`);
+                resetUI();
+            });
+        }
+
+        async function startCall() {
+            if (!retellClient) {
+                updateStatus('error', '❌ SDK not initialized');
+                return;
+            }
+
+            try {
+                updateStatus('connecting', '🔄 Getting access token...');
+                startButton.disabled = true;
+
+                // Get access token from backend
+                const response = await fetch('http://localhost:8000/api/retell/token', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to get access token');
+                }
+
+                const { access_token, call_id } = await response.json();
+                console.log('✅ Access token received');
+                console.log('📞 Call ID:', call_id);
+
+                updateStatus('connecting', '🎤 Starting call...');
+
+                // Start the call using Retell SDK (exactly as per docs)
+                await retellClient.startCall({
+                    accessToken: access_token,
+                    sampleRate: 24000,
+                    captureDeviceId: 'default',
+                    emitRawAudioSamples: false
+                });
+
+                console.log('🎤 Call started successfully');
+
+            } catch (error) {
+                console.error('❌ Error starting call:', error);
+                updateStatus('error', `❌ ${error.message}`);
+                startButton.disabled = false;
+            }
+        }
+
+        function endCall() {
+            if (retellClient) {
+                console.log('📞 Ending call...');
+                retellClient.stopCall();
+            }
+        }
+
+        function resetUI() {
+            startButton.style.display = 'inline-flex';
+            startButton.disabled = false;
+            startButton.classList.remove('calling');
+            endButton.style.display = 'none';
+            audioIndicator.classList.remove('active');
+            
+            setTimeout(() => {
+                updateStatus('idle', 'Ready to connect - Click to start');
+            }, 2000);
+        }
+
+        function updateStatus(type, message) {
+            statusDiv.className = `status ${type}`;
+            statusDiv.innerHTML = message;
+        }
+
+        function copyScenario(element) {
+            const text = element.textContent.substring(2);
+            navigator.clipboard.writeText(text);
+            
+            const originalText = element.textContent;
+            element.textContent = '✅ Copied! Start call and say this...';
+            element.style.background = '#d1fae5';
+            
+            setTimeout(() => {
+                element.textContent = originalText;
+                element.style.background = 'white';
+            }, 2500);
+        }
+
+        console.log('🚨 Emergentica Voice Interface Ready');
+    </script>
+</body>
+</html>
